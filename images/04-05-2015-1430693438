@@ -1,0 +1,100 @@
+public class InfixToPostfix {
+    private boolean isOperator(char c) {
+        return c == '+' || c == '-' || c == '*' || c == '/' || c == '^'
+                || c == '(' || c == ')';
+    }
+    private boolean isSpace(char c) {
+        return (c == ' ');
+    }
+    private boolean lowerPrecedence(char op1, char op2) {
+        switch (op1) {
+            case '+':
+            case '-':
+                return !(op2 == '+' || op2 == '-');
+            case '*':
+            case '/':
+                return op2 == '^' || op2 == '(';
+            case '^':
+                return op2 == '(';
+            case '(':
+                return true;
+            default:
+                return false;
+        }
+    }
+    public String convertToPostfix(String infix) {
+        Stack operatorStack = new Stack();
+        char c;
+        StringTokenizer parser = new StringTokenizer(infix, "+-*/^()", true);
+        StringBuffer postfix = new StringBuffer(infix.length());
+        while (parser.hasMoreTokens()) {
+            String token = parser.nextToken();
+            c = token.charAt(0);
+            if ((token.length() == 1) && isOperator(c)) {
+                while (!operatorStack.empty() &&
+                        !lowerPrecedence(((String) operatorStack.peek()).charAt(0), c))
+                    postfix.append(" ").append((String) operatorStack.pop());
+
+                if (c == ')') {
+                    String operator = (String) operatorStack.pop();
+                    while (operator.charAt(0) != '(') {
+                        postfix.append(" ").append(operator);
+                        operator = (String) operatorStack.pop();
+                    }
+                } else
+                    operatorStack.push(token);
+            } else if ((token.length() == 1) && isSpace(c)) {
+            } else {
+                postfix.append(" ").append(token);
+            }
+        }
+        while (!operatorStack.empty())
+            postfix.append(" ").append((String) operatorStack.pop());
+        return postfix.toString();
+    }
+    
+    public static void main(String[] args) {  // Test method for the class.
+        String[] testString = {"32+(5*4+(2-1))"};
+        InfixToPostfix converter = new InfixToPostfix();
+        System.out.println("\nTest for convertToPostfix:\n");
+
+        for (int i = 0; i < testString.length; i++) {
+            System.out.println("infix: " + testString[i]);
+            System.out.println("postfix: " + converter.convertToPostfix(testString[i]));
+            System.out.println();
+        }
+    } // end main
+}//end class InfixToPostfix
+public class Solution {
+    public int evalRPN(String[] tokens) {
+        Stack<String> stack=new Stack<String>();
+        for(int i=0;i<tokens.length;i++){
+            if(!isOp(tokens[i])){
+                stack.push(tokens[i]);
+            }else{
+                int a=Integer.parseInt(stack.pop());
+                int b=Integer.parseInt(stack.pop());
+                int c=calculate(a,b,tokens[i]);
+                stack.push((c+""));
+            }
+        }
+        return Integer.parseInt(stack.pop());
+    }
+    public int calculate(int a,int b,String op){
+        if(op.equals("+")){
+            return a+b;
+        }else if(op.equals("-")){
+            return b-a;
+        }else if(op.equals("*")){
+            return a*b;
+        }else{
+            return b/a;
+        }
+    }
+    public boolean isOp(String num){
+        if(num.equals("+")||num.equals("-")||num.equals("*")||num.equals("/")){
+            return true;
+        }
+        return false;
+    }
+}
